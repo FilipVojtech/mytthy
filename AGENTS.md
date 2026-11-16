@@ -6,7 +6,7 @@
 
 - Before planning or implementing, read [PLAN.md](PLAN.md), check **Current work** to coordinate with other agents, and read the linked task. Use requirement IDs and acceptance criteria to define scope.
 - Keep one Markdown file per task in `tasks/`, named `MYT-###-short-issue-name.md`. Use the next unused number and a lowercase hyphenated title. Keep the issue code stable.
-- In each task file, include the issue code and title, description, related requirement IDs, and testable acceptance criteria. Use dev notes for dependencies, decisions, verification results, and remaining work.
+- Start each task file with a level-one heading containing the issue code and title. Use these level-two headings in order: **Description**, **Acceptance criteria**, **Related requirements**, **Conclusion** when closing the task, and **Dev notes** when needed. List testable checks under Acceptance criteria and requirement IDs under Related requirements. Summarize the outcome and any handoff under Conclusion. Use Dev notes for dependencies, decisions, verification results, and remaining work.
 - Link each task under its milestone in `PLAN.md`. When starting work, list the task link and its focus under **Current work**, one entry per task. Update the focus or name the blocker as work changes. Keep handoff details in the task file.
 - Record what passed and what remains in the task file. Check off the milestone entry when acceptance criteria pass. Remove the **Current work** entry when work completes or pauses. When empty, write “No roadmap task is in progress.”
 
