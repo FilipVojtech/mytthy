@@ -22,7 +22,7 @@ No roadmap task is in progress.
 
 - **NFR-1 · Performance.** Keep startup, typing, scrolling, tab switching, and opening settings responsive on the reference machine, the developer's current computer. Use the same machine for baseline and prototype measurements. Record timings and memory use independently of the machine's hardware identifiers.
 - **NFR-2 · Usability.** Make settings easy to find and use. Launch the configured shell without requiring manual profile setup, and make mouse text selection and clipboard behavior predictable.
-- **NFR-3 · KDE Plasma window integration.** Respect user-configured Plasma window behavior on Wayland. At minimum, the title bar must reflect the user's choice and order of buttons on either side, including Close, Minimize, and Keep Above Others. Each button must perform the corresponding window action. The toolkit may delegate decorations to KWin or draw its own. For toolkit-drawn decorations, the toolkit must either honor these settings directly or expose enough control over button layout and window actions for the app to implement the integration. Track additional Plasma integrations as they are identified.
+- **NFR-3 · KDE Plasma window integration.** The optional Plasma frontend in MYT-023 respects user-configured Plasma window behavior on Wayland. At minimum, the title bar must reflect the user's choice and order of buttons on either side, including Close, Minimize, and Keep Above Others. Each button must perform the corresponding window action. The toolkit may delegate decorations to KWin or draw its own. For toolkit-drawn decorations, the toolkit must either honor these settings directly or expose enough control over button layout and window actions for the app to implement the integration. Track additional Plasma integrations as they are identified.
 
 ## Roadmap
 
@@ -32,7 +32,6 @@ The Rust crate is a starter binary. The first release targets local terminal use
 
 - [x] [MYT-001 Measure Tabby baseline](tasks/MYT-001-measure-tabby-baseline.md)
 - [x] [MYT-002 Prototype shell state detection](tasks/MYT-002-prototype-shell-state-detection.md)
-- [ ] [MYT-003 Evaluate toolkit and terminal engine](tasks/MYT-003-evaluate-toolkit-and-terminal-engine.md)
 - [ ] [MYT-004 Verify Plasma decorations in toolkit candidates](tasks/MYT-004-verify-plasma-decorations-in-toolkit-candidates.md)
 - [ ] [MYT-005 Set performance targets and settings scope](tasks/MYT-005-set-performance-targets-and-settings-scope.md)
 - [ ] [MYT-006 Prototype click to position](tasks/MYT-006-prototype-click-to-position.md)
