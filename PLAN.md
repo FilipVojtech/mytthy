@@ -53,12 +53,12 @@ The first release targets local terminal use on Fedora KDE Wayland. Each milesto
 - [x] [MYT-007 Build PTY terminal window](tasks/MYT-007-build-pty-terminal-window.md)
 - [x] [MYT-028 Evaluate a Rust-native default frontend](tasks/MYT-028-evaluate-rust-native-default-frontend.md)
 - [x] [MYT-029 Integrate the Rust-native PTY window](tasks/MYT-029-integrate-the-rust-native-pty-window.md)
-- [ ] [MYT-008 Launch the configured shell](tasks/MYT-008-launch-the-configured-shell.md)
-- [ ] [MYT-009 Support mouse selection and clipboard](tasks/MYT-009-support-mouse-selection-and-clipboard.md)
+- [x] [MYT-008 Launch the configured shell](tasks/MYT-008-launch-the-configured-shell.md)
+- [x] [MYT-009 Support mouse selection and clipboard](tasks/MYT-009-support-mouse-selection-and-clipboard.md)
 - [ ] [MYT-010 Implement context-sensitive Ctrl+C](tasks/MYT-010-implement-context-sensitive-ctrl-c.md)
 - [ ] [MYT-011 Implement app-owned command input](tasks/MYT-011-implement-click-to-position.md)
-- [ ] [MYT-012 Add independent terminal tabs](tasks/MYT-012-add-independent-terminal-tabs.md)
-- [ ] [MYT-013 Build graphical settings](tasks/MYT-013-build-graphical-settings.md)
+- [x] [MYT-012 Add independent terminal tabs](tasks/MYT-012-add-independent-terminal-tabs.md)
+- [x] [MYT-013 Build graphical settings](tasks/MYT-013-build-graphical-settings.md)
 
 **Exit criterion.** The app runs locally and satisfies FR-1, FR-2, FR-3, FR-5, and FR-6.
 

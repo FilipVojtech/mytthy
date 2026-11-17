@@ -14,6 +14,13 @@ Build the graphical settings page. Verify the agreed controls take effect and pe
 - FR-8 · Shared settings across frontends
 - NFR-2 · Settings discoverability and usability
 
+## Conclusion
+
+The graphical font-size controls passed current-tab, new-tab, relaunch,
+reset, invalid-file replacement, and save-failure checks in the integrated
+build on native KWin Wayland. MYT-011 carries font-size inheritance into
+the app-owned prompt editor.
+
 ## Dev notes
 
 - The first release exposes one control, **Terminal font size**. The default
@@ -64,6 +71,5 @@ Build the graphical settings page. Verify the agreed controls take effect and pe
 - Screenshots of the normal page, saved font, invalid-file confirmation,
   and save failure were inspected. Test scripts, logs, and screenshots
   are under `/tmp/myt013-ui.O9JGNF`.
-- Full integrated verification remains with the coordinator after merging
-  the frontend ownership branches. App-owned prompt editor inheritance
-  is verified during MYT-011.
+- The fresh merged build repeated the settings checks successfully.
+  App-owned prompt editor inheritance is verified during MYT-011.

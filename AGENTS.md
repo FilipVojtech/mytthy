@@ -34,6 +34,9 @@
   The frontend owns window events and text rendering. Its session module
   bridges the UI to Alacritty's PTY worker and terminal grid. Keep the PTY
   worker independent of widget code.
+- `src/iced_frontend/mod.rs` owns tab identity, worker routing, and settings
+  application. `grid.rs` owns grid rendering, selection, and clipboard
+  gestures. `settings_view.rs` supplies settings controls and draft validation.
 - `src/bin/mytthy-gtk.rs` is the optional GTK4/VTE reference from MYT-007.
 - `src/lib.rs` exposes shared policy such as `src/session.rs` and
   `src/settings.rs`. Keep those modules independent of frontend and

@@ -22,6 +22,14 @@ loads the Wayland client and cursor libraries and xkbcommon from the
 desktop runtime. Use `cargo check --locked --no-default-features --lib` to
 check the shared library with frontend features disabled.
 
+### Terminal controls
+
+Open a tab with the + button or Ctrl+Shift+T. Switch with Ctrl+Tab or
+Ctrl+Shift+Tab, and close the active tab with Ctrl+Shift+W.
+Drag to select output, copy with Ctrl+Shift+C, and paste with Ctrl+Shift+V.
+Open Settings to change the terminal font size for all tabs and save it
+across relaunches.
+
 ### GTK4/VTE reference
 
 The original PTY window is available as `mytthy-gtk`. It uses GTK 4.18 or

@@ -43,3 +43,10 @@ with per-session shell resolution covered by the MYT-008 fixture checks.
   build passed all 11 tests, Clippy with warnings denied, formatting, and
   the repeated native tab/session checks. A regression test verifies
   last-session exit while settings are saving closes after the save ends.
+
+### Verification environment
+
+- Toolbox discovery and private D-Bus session launch attempts correlated
+  with SELinux domain-transition denials reported by the user. SELinux
+  remained enforcing and its policy was unchanged. The final merged app
+  passed the native checks in the disposable test environment.

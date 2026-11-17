@@ -52,3 +52,11 @@ text through the terminal input callback and honors bracketed paste mode.
 - The tabs integration supplies `Grid::on_input` with a callback scoped to a
   stable tab ID. Combined tabs and settings verification belongs to the
   coordinating integration run.
+
+### Combined build verification
+
+- The freshly rebuilt merged app passed wrapped selection, scrollback drag
+  with wheel input, clipboard checks, multiline paste, and independent
+  selections across tab switches. Font-size changes resized the PTY and
+  new selection across reflowed rows copied correctly. Column-count changes
+  clear the existing selection through Alacritty's resize behavior.
