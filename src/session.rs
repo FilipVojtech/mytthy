@@ -24,6 +24,31 @@ impl ShellState {
     }
 }
 
+/// The frontend applies one action to the active session for each Ctrl+C.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum CtrlCAction {
+    CopySelection,
+    ClearDraftAndForward,
+    Forward,
+}
+
+/// Choose copy or interrupt using independently confirmed prompt readiness.
+///
+/// The caller must revalidate readiness at dispatch, including the adapter's
+/// current primary-prompt generation, foreground process group, and absence of
+/// an in-flight submission. Advisory terminal output markers alone cannot
+/// establish readiness. Select the active editor or terminal selection before
+/// calling this policy, and consume the event before widget default handling.
+/// Forward sends normal Ctrl+C input to the PTY, preserving terminal interrupt
+/// configuration. ClearDraftAndForward also clears the local app-owned draft.
+pub fn ctrl_c_action(prompt_ready: bool, has_selection: bool) -> CtrlCAction {
+    match (prompt_ready, has_selection) {
+        (true, true) => CtrlCAction::CopySelection,
+        (true, false) => CtrlCAction::ClearDraftAndForward,
+        (false, _) => CtrlCAction::Forward,
+    }
+}
+
 /// Resolve the initial interactive shell from the launch environment.
 pub fn shell_executable() -> String {
     std::env::var("SHELL")
@@ -84,7 +109,20 @@ fn account_shell() -> Option<PathBuf> {
 
 #[cfg(test)]
 mod tests {
-    use super::ShellState;
+    use super::{CtrlCAction, ShellState, ctrl_c_action};
+
+    #[test]
+    fn copies_only_at_a_confirmed_idle_prompt() {
+        let cases = [
+            (true, true, CtrlCAction::CopySelection),
+            (true, false, CtrlCAction::ClearDraftAndForward),
+            (false, true, CtrlCAction::Forward),
+            (false, false, CtrlCAction::Forward),
+        ];
+        for (ready, selection, expected) in cases {
+            assert_eq!(ctrl_c_action(ready, selection), expected);
+        }
+    }
 
     #[test]
     fn maps_shell_markers_to_advisory_state() {
