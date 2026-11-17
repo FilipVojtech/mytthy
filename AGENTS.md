@@ -30,5 +30,11 @@
 
 ## Component map
 
-- `src/main.rs` is the GTK4 entry point. It uses VTE for the terminal widget and PTY and calls shared session policy through the library.
-- `src/lib.rs` exposes shared modules such as `src/session.rs`. Keep them independent of GTK4 and VTE so they build without the default frontend feature.
+- `src/main.rs` starts the default Iced frontend under `src/iced_frontend/`.
+  The frontend owns window events and text rendering. Its session module
+  bridges the UI to Alacritty's PTY worker and terminal grid. Keep the PTY
+  worker independent of widget code.
+- `src/bin/mytthy-gtk.rs` is the optional GTK4/VTE reference from MYT-007.
+- `src/lib.rs` exposes shared policy such as `src/session.rs` and
+  `src/settings.rs`. Keep those modules independent of frontend and
+  terminal-engine types so they build with frontend features disabled.

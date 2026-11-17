@@ -2,16 +2,25 @@
 name = "mytthy"
 version = "0.1.0"
 edition = "2024"
+default-run = "mytthy"
 
 [dependencies]
+alacritty_terminal = { version = "0.26", default-features = false, optional = true }
+iced = { version = "0.14", default-features = false, features = ["advanced", "wayland", "tiny-skia", "thread-pool"], optional = true }
 libc = "0.2"
+log = { version = "0.4", optional = true }
 toml = "1"
 vte4 = { version = "0.10", features = ["gtk_v4_18", "v0_78"], optional = true }
 
 [features]
-default = ["gtk-frontend"]
+default = ["iced-frontend"]
 gtk-frontend = ["dep:vte4"]
+iced-frontend = ["dep:iced", "dep:alacritty_terminal", "dep:log"]
 
 [[bin]]
 name = "mytthy"
+required-features = ["iced-frontend"]
+
+[[bin]]
+name = "mytthy-gtk"
 required-features = ["gtk-frontend"]
