@@ -4,3 +4,12 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+vte4 = { version = "0.10", features = ["gtk_v4_18", "v0_78"], optional = true }
+
+[features]
+default = ["gtk-frontend"]
+gtk-frontend = ["dep:vte4"]
+
+[[bin]]
+name = "mytthy"
+required-features = ["gtk-frontend"]
