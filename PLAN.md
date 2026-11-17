@@ -44,6 +44,8 @@ The first release targets local terminal use on Fedora KDE Wayland. Each milesto
 
 **Exit criterion.** The prototype demonstrates all three FR-5 cases on the reference machine. The plan records the stack choice.
 
+**Closed · 2026-11-17.** MYT-002 verified the three FR-5 paths in a PTY harness on the reference machine with simulated selection and clipboard. MYT-006 verified selection and copy on native Wayland, idle draft clearing without a selection, and foreground interruption with text selected. The app-owned prototype forwards Ctrl+C to the PTY after clearing an unselected idle draft. MYT-003 records GTK4 + VTE as the provisional stack. Carry production integration and Wayland checks into MYT-007 and MYT-009 through MYT-011. MYT-005 remains deferred.
+
 ### 2. Build the core terminal
 
 - [ ] [MYT-007 Build PTY terminal window](tasks/MYT-007-build-pty-terminal-window.md)
