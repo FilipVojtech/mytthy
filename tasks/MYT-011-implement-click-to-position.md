@@ -4,6 +4,8 @@
 
 Implement the app-owned prompt editor from MYT-006. Keep buffer editing shared and put prompt detection, submission, and shell-specific behavior behind shell adapters.
 
+Completion is tracked in [MYT-030](MYT-030-implement-command-completion.md).
+
 ## Acceptance criteria
 
 - Click several positions on plain and wrapped input. Confirm typing inserts there and dragging still selects text.
@@ -18,5 +20,4 @@ Implement the app-owned prompt editor from MYT-006. Keep buffer editing shared a
 
 ## Dev notes
 
-- Use a shared completion interface. If a common declarative format covers the supported sources, keep its parser in shared app code. Put format-specific, shell-specific, or application-specific completion handling in specialized provider modules. Verify which formats and mechanisms are available before choosing a parser.
-- Completion coverage and history search scope are open product decisions.
+- History search scope remains an open product decision.

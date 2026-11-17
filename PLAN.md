@@ -57,6 +57,7 @@ The first release targets local terminal use on Fedora KDE Wayland. Each milesto
 - [x] [MYT-009 Support mouse selection and clipboard](tasks/MYT-009-support-mouse-selection-and-clipboard.md)
 - [ ] [MYT-010 Implement context-sensitive Ctrl+C](tasks/MYT-010-implement-context-sensitive-ctrl-c.md)
 - [ ] [MYT-011 Implement app-owned command input](tasks/MYT-011-implement-click-to-position.md)
+- [ ] [MYT-030 Implement command completion](tasks/MYT-030-implement-command-completion.md)
 - [x] [MYT-012 Add independent terminal tabs](tasks/MYT-012-add-independent-terminal-tabs.md)
 - [x] [MYT-013 Build graphical settings](tasks/MYT-013-build-graphical-settings.md)
 
