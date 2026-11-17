@@ -7,3 +7,24 @@ Launch the configured login shell for new sessions and verify FR-1 after changin
 ## Acceptance criteria
 
 - Change the account default shell and verify a new session uses it without a new profile. Verify Zsh with Oh My Zsh.
+
+## Related requirements
+
+- FR-1 · Use the configured default shell for new sessions.
+- NFR-5 · Dependency independence.
+
+## Dev notes
+
+- The shared resolver calls Linux NSS by real user ID on each invocation. It
+  prefers an absolute account shell, falling back to the existing absolute
+  `SHELL` or `/bin/sh` if no usable account shell is returned. It retains path
+  bytes in a `PathBuf`. The already-locked `libc` crate provides bindings to
+  the system C library. It adds no application-specific native dependency.
+- GUI-free tests passed. A resolver probe matched the current account shell
+  returned by `getent` with both an absolute stale `SHELL` and an invalid
+  relative `SHELL`.
+- The current GTK/VTE launch still uses the environment-only path. When
+  integrating per-session launch, call the new resolver off the GUI thread
+  because NSS can query directory services. Preserve launch cancellation and
+  verify a new tab picks up an account shell change with the app still open.
+  Recheck Zsh with Oh My Zsh on native Wayland.
