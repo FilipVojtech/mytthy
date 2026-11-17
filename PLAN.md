@@ -51,7 +51,8 @@ The first release targets local terminal use on Fedora KDE Wayland. Each milesto
 ### 2. Build the core terminal
 
 - [x] [MYT-007 Build PTY terminal window](tasks/MYT-007-build-pty-terminal-window.md)
-- [ ] [MYT-028 Evaluate a Rust-native default frontend](tasks/MYT-028-evaluate-rust-native-default-frontend.md)
+- [x] [MYT-028 Evaluate a Rust-native default frontend](tasks/MYT-028-evaluate-rust-native-default-frontend.md)
+- [ ] [MYT-029 Integrate the Rust-native PTY window](tasks/MYT-029-integrate-the-rust-native-pty-window.md)
 - [ ] [MYT-008 Launch the configured shell](tasks/MYT-008-launch-the-configured-shell.md)
 - [ ] [MYT-009 Support mouse selection and clipboard](tasks/MYT-009-support-mouse-selection-and-clipboard.md)
 - [ ] [MYT-010 Implement context-sensitive Ctrl+C](tasks/MYT-010-implement-context-sensitive-ctrl-c.md)
@@ -98,3 +99,5 @@ The first release targets local terminal use on Fedora KDE Wayland. Each milesto
 - Ship one neutral frontend first and keep it usable on every supported desktop. Keep shared session and settings policy independent of GUI toolkit types so optional desktop-specific frontends can reuse it. Verify the terminal engine boundary in the initial implementation under MYT-007.
 
 - Prototype the neutral frontend with GTK4 + VTE. If VTE prevents the required terminal input behavior or reusable terminal state becomes a deciding factor, compare `alacritty_terminal` and `libghostty-vt` in the same custom frontend.
+
+- Use Iced with Wayland-only tiny-skia and `alacritty_terminal` for the MYT-029 migration. MYT-028 verified the GUI and terminal engine separately and built without separately installed application-specific libraries. Keep the GTK4/VTE build as the default until the integrated replacement passes MYT-029.
