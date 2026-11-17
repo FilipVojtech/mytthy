@@ -424,6 +424,7 @@ name = "mytthy"
 version = "0.1.0"
 dependencies = [
  "libc",
+ "toml",
  "vte4",
 ]
 
