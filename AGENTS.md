@@ -12,6 +12,8 @@
 
 ## Implementation and verification
 
+- Prefer pure Rust crates that need no separately installed application-specific system libraries. Check native and transitive dependencies before adding a crate and document any required exception under NFR-5.
+
 - Keep diffs focused, follow nearby conventions, and limit lockfile changes to dependencies needed for the task.
 - Keep blocking terminal I/O off the UI thread. Surface shell launch and PTY failures with enough detail to diagnose them.
 - Use comments for contracts, invariants, and rationale that are hard to infer from code.

@@ -24,6 +24,8 @@ No roadmap task is in progress.
 
 ## Non-functional requirements
 
+- **NFR-5 · Dependency independence.** Prefer pure Rust crates that build through Cargo without separately installed application-specific system libraries. Treat GTK4 and VTE as the provisional frontend stack and evaluate alternatives before committing to the production stack. Linux PTYs, the Wayland compositor, and the user's configured shell are part of the supported environment. Release packages must bundle application runtime dependencies or resolve them automatically during installation.
+
 - **NFR-4 · Native Wayland.** Run as a native Wayland client without an X11 or XWayland fallback. Use modern Wayland and desktop protocols for the integrations the app needs. Verify each shipped feature on native Wayland, with Fedora KDE Plasma as the first reference environment.
 
 - **NFR-1 · Performance.** Keep startup, typing, scrolling, tab switching, and opening settings responsive on the reference machine, the developer's current computer. Use the same machine for baseline and prototype measurements. Record timings and memory use independently of the machine's hardware identifiers.
@@ -49,6 +51,7 @@ The first release targets local terminal use on Fedora KDE Wayland. Each milesto
 ### 2. Build the core terminal
 
 - [x] [MYT-007 Build PTY terminal window](tasks/MYT-007-build-pty-terminal-window.md)
+- [ ] [MYT-028 Evaluate a Rust-native default frontend](tasks/MYT-028-evaluate-rust-native-default-frontend.md)
 - [ ] [MYT-008 Launch the configured shell](tasks/MYT-008-launch-the-configured-shell.md)
 - [ ] [MYT-009 Support mouse selection and clipboard](tasks/MYT-009-support-mouse-selection-and-clipboard.md)
 - [ ] [MYT-010 Implement context-sensitive Ctrl+C](tasks/MYT-010-implement-context-sensitive-ctrl-c.md)
