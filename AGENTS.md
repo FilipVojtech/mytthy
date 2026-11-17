@@ -25,3 +25,8 @@
 - Add a short component map as the architecture takes shape. Name entry points and allowed dependencies between layers. Feasibility prototypes live under `src/` on the `prototype` branch.
 - Refer to the performance reference machine by role. Keep exact hardware specs out of tracked files.
 - Write instructions directly. Omit phrases like “once it exists” unless they tell contributors when or how to act.
+
+## Component map
+
+- `src/main.rs` is the GTK4 entry point. It uses VTE for the terminal widget and PTY and calls shared session policy through the library.
+- `src/lib.rs` exposes shared modules such as `src/session.rs`. Keep them independent of GTK4 and VTE so they build without the default frontend feature.

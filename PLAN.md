@@ -48,7 +48,7 @@ The first release targets local terminal use on Fedora KDE Wayland. Each milesto
 
 ### 2. Build the core terminal
 
-- [ ] [MYT-007 Build PTY terminal window](tasks/MYT-007-build-pty-terminal-window.md)
+- [x] [MYT-007 Build PTY terminal window](tasks/MYT-007-build-pty-terminal-window.md)
 - [ ] [MYT-008 Launch the configured shell](tasks/MYT-008-launch-the-configured-shell.md)
 - [ ] [MYT-009 Support mouse selection and clipboard](tasks/MYT-009-support-mouse-selection-and-clipboard.md)
 - [ ] [MYT-010 Implement context-sensitive Ctrl+C](tasks/MYT-010-implement-context-sensitive-ctrl-c.md)
