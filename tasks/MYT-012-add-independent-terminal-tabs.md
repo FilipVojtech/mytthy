@@ -14,6 +14,12 @@ Add basic tabs with independent sessions so tab switching can be tested and tabs
 - NFR-4 · Native Wayland.
 - FR-1 · Resolve the configured shell for each new session.
 
+## Conclusion
+
+Independent tabs passed their acceptance checks on native KWin Wayland.
+The integrated frontend includes MYT-009 selection and MYT-013 settings,
+with per-session shell resolution covered by the MYT-008 fixture checks.
+
 ## Dev notes
 
 - Each tab owns its PTY session, terminal grid and scrollback, selection,
@@ -33,5 +39,7 @@ Add basic tabs with independent sessions so tab switching can be tested and tabs
   preserved Zsh. Closing the window reaped the remaining shell.
 - Integration depends on MYT-009's Grid input callback and MYT-013's settings
   view. The composition file also routes asynchronous settings saves and
-  applies font metrics only after persistence succeeds. Combined final
-  verification remains pending until those branches are merged.
+  applies font metrics only after persistence succeeds. The merged
+  build passed all 11 tests, Clippy with warnings denied, formatting, and
+  the repeated native tab/session checks. A regression test verifies
+  last-session exit while settings are saving closes after the save ends.
