@@ -28,3 +28,10 @@ Launch the configured login shell for new sessions and verify FR-1 after changin
   account lookup and surfaced an invalid executable. Verify a new tab picks
   up an account shell change with the app still open and verify the configured
   Zsh with Oh My Zsh on native Wayland. MYT-012 provides the new-tab entry point.
+- MYT-012 verified the new-tab entry point on native isolated KWin. A
+  disposable NSS lookup fixture changed the reported account shell from Bash
+  to Zsh while the app remained open, with a stale inherited SHELL. The new
+  tab launched Zsh and loaded the configured Oh My Zsh. The existing Bash
+  tab kept its process and state. An invalid account executable surfaced a
+  per-tab launch error. This check used a private lookup fixture. A real
+  account-default change through the system account tools remains unverified.

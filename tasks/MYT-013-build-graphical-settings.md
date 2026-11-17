@@ -32,12 +32,38 @@ Build the graphical settings page. Verify the agreed controls take effect and pe
   same directory. It preserves unrecognized TOML keys from the loaded
   document. The `toml` crate is also an existing GTK4/VTE build-time
   dependency and adds no native libraries.
-- After MYT-028 selects the frontend, add the settings entry and page. Keep
-  the current setting if Apply fails and present the save error. On read
-  errors, show the error and use the defaults for the running app. Preserve
-  an invalid file until the user explicitly chooses to replace it.
+- The Iced settings view presents a font-size field, Use default, and Apply.
+  Reset changes the draft and Apply saves it. The frontend composition owns
+  navigation, asynchronous persistence, and updating metrics on all tabs.
+  Save failures retain the effective setting and display the path and reason.
+  Loading errors use defaults and require an explicit replacement checkbox
+  before Apply can replace the unreadable file.
 - GUI-free checks passed for missing files, font size save and reset,
   preservation of unknown keys, invalid data, and save failure cleanup.
   On KDE Plasma Wayland, verify opening settings, applying the override
   to all tabs, relaunching with that size, and persisting the return to
   defaults. Check the prompt editor after MYT-011 integration.
+
+### Settings UI verification
+
+- The settings view compiled in an isolated fixture with Iced 0.14. The
+  draft-validation regression test passed for blank defaults, allowed
+  boundaries, whitespace, out-of-range sizes, fractions, and non-numbers.
+- A combined fixture using the MYT-012 session composition passed native
+  KWin Wayland checks with disposable XDG settings and Zsh startup files.
+  The Settings button opened the page. Applying 24 points changed the
+  existing PTY from 20 × 81 cells to 10 × 40. A new tab also reported
+  10 × 40, and relaunch restored that size. Use default and Apply removed
+  the override and restored 20 × 81.
+- The same fixture preserved an unrelated TOML key. An invalid font-size
+  value displayed the path and reason and stayed intact when Apply was
+  clicked before replacement was selected. Selecting the replacement
+  checkbox allowed saving. Replacing the target file with a directory
+  caused a visible save error, kept the prior effective font size, and
+  allowed returning to the terminal and issuing commands.
+- Screenshots of the normal page, saved font, invalid-file confirmation,
+  and save failure were inspected. Test scripts, logs, and screenshots
+  are under `/tmp/myt013-ui.O9JGNF`.
+- Full integrated verification remains with the coordinator after merging
+  the frontend ownership branches. App-owned prompt editor inheritance
+  is verified during MYT-011.
