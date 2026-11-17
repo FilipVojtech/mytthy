@@ -242,8 +242,7 @@ impl App {
                     }
                     Err(error) => self.settings_state.error = Some(error),
                 }
-                if self.closing
-                    && self.tabs.is_empty()
+                if self.tabs.is_empty()
                     && let Some(id) = self.window
                 {
                     return window::close(id);
@@ -489,5 +488,21 @@ impl App {
         .width(Length::Fill)
         .height(Length::Fill)
         .into()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn finishing_settings_save_closes_after_last_session_exits() {
+        let mut app = App::new(Settings::default(), None);
+        app.window = Some(window::Id::unique());
+        app.settings_state.saving = true;
+        assert!(!app.closing);
+        let task = app.update(Message::SettingsSaved(Settings::default(), Ok(())));
+        assert_eq!(task.units(), 1);
+        assert!(!app.settings_state.saving);
     }
 }
