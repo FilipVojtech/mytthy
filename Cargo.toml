@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+toml = "1"
 vte4 = { version = "0.10", features = ["gtk_v4_18", "v0_78"], optional = true }
 
 [features]

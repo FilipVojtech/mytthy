@@ -423,6 +423,7 @@ dependencies = [
 name = "mytthy"
 version = "0.1.0"
 dependencies = [
+ "toml",
  "vte4",
 ]
 
