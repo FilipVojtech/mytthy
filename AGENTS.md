@@ -22,6 +22,6 @@
 
 - Keep setup, build, and run instructions in `README.md`. Update `PLAN.md` when requirements, milestones, or lasting product decisions change. Record decision rationale there.
 - Update this file when guidance becomes stale or agents need a lasting rule. Document repository conventions and invariants, including platform constraints, generated files, and behavior to preserve.
-- Add a short component map as the architecture takes shape. Name entry points and allowed dependencies between layers. The binary starts at `src/main.rs`.
+- Add a short component map as the architecture takes shape. Name entry points and allowed dependencies between layers. Feasibility prototypes live under `src/` on the `prototype` branch.
 - Refer to the performance reference machine by role. Keep exact hardware specs out of tracked files.
 - Write instructions directly. Omit phrases like “once it exists” unless they tell contributors when or how to act.

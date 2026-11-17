@@ -15,9 +15,12 @@ No roadmap task is in progress.
 | FR-3 | Support click-and-drag text selection in terminal output. | Core |
 | FR-4 | Drag an existing tab to the desired position to create a split pane there. | Nice to have |
 | FR-5 | Handle Ctrl+C according to the shell state and text selection. | Core |
-| FR-6 | Left-click within the editable shell input to place the caret at the clicked text position, including on wrapped input lines. A drag still selects text. | Core |
+| FR-6 | At supported shell prompts, edit commands in an app-owned buffer with click-to-position on plain and wrapped input. A drag still selects text. Submit the buffer through a shell adapter. | Core |
 | FR-7 | Support keyboard navigation forward and backward across word and CamelHumps boundaries in shell input, such as between `parse`, `Shell`, and `Input` in `parseShellInput`. | Nice to have |
 | FR-8 | Offer optional desktop-specific frontends that share terminal behavior and settings with the default neutral frontend. | Low |
+| FR-9 | Group submitted commands and their output into one block per command at supported shell prompts. | Nice to have |
+| FR-10 | Save commands as favorites and run them from a list. | Nice to have |
+| FR-11 | Provide a graphical editor for scheduling commands as cron jobs. | Nice to have |
 
 ## Non-functional requirements
 
@@ -29,7 +32,7 @@ No roadmap task is in progress.
 
 ## Roadmap
 
-The Rust crate is a starter binary. The first release targets local terminal use on Fedora KDE Wayland. Each milestone lists its tasks and exit criterion. Task files contain acceptance criteria and development notes.
+The first release targets local terminal use on Fedora KDE Wayland. Each milestone lists its tasks and exit criterion. Task files contain acceptance criteria and development notes. Feasibility prototype code lives under `src/` on the `prototype` branch.
 
 ### 1. Establish feasibility
 
@@ -37,7 +40,7 @@ The Rust crate is a starter binary. The first release targets local terminal use
 - [x] [MYT-002 Prototype shell state detection](tasks/MYT-002-prototype-shell-state-detection.md)
 - [x] [MYT-003 Evaluate toolkit and terminal engine](tasks/MYT-003-evaluate-toolkit-and-terminal-engine.md)
 - [ ] [MYT-005 Set performance targets and settings scope](tasks/MYT-005-set-performance-targets-and-settings-scope.md) · Deferred
-- [ ] [MYT-006 Prototype click to position](tasks/MYT-006-prototype-click-to-position.md)
+- [x] [MYT-006 Prototype app-owned command input](tasks/MYT-006-prototype-click-to-position.md)
 
 **Exit criterion.** The prototype demonstrates all three FR-5 cases on the reference machine. The plan records the stack choice.
 
@@ -47,7 +50,7 @@ The Rust crate is a starter binary. The first release targets local terminal use
 - [ ] [MYT-008 Launch the configured shell](tasks/MYT-008-launch-the-configured-shell.md)
 - [ ] [MYT-009 Support mouse selection and clipboard](tasks/MYT-009-support-mouse-selection-and-clipboard.md)
 - [ ] [MYT-010 Implement context-sensitive Ctrl+C](tasks/MYT-010-implement-context-sensitive-ctrl-c.md)
-- [ ] [MYT-011 Implement click to position](tasks/MYT-011-implement-click-to-position.md)
+- [ ] [MYT-011 Implement app-owned command input](tasks/MYT-011-implement-click-to-position.md)
 - [ ] [MYT-012 Add independent terminal tabs](tasks/MYT-012-add-independent-terminal-tabs.md)
 - [ ] [MYT-013 Build graphical settings](tasks/MYT-013-build-graphical-settings.md)
 
@@ -71,6 +74,9 @@ The Rust crate is a starter binary. The first release targets local terminal use
 
 - [ ] [MYT-023 Add desktop-specific frontends](tasks/MYT-023-add-desktop-specific-frontends.md)
 - [ ] [MYT-024 Package for Flatpak](tasks/MYT-024-package-for-flatpak.md)
+- [ ] [MYT-025 Group terminal output by command](tasks/MYT-025-group-terminal-output-by-command.md)
+- [ ] [MYT-026 Save and run favorite commands](tasks/MYT-026-save-and-run-favorite-commands.md)
+- [ ] [MYT-027 Edit scheduled commands](tasks/MYT-027-edit-scheduled-commands.md)
 
 **Exit criterion.** Each selected feature passes its checks. If FR-4 is selected, verify live split session responsiveness under NFR-1.
 
