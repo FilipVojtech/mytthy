@@ -31,15 +31,15 @@ No roadmap task is in progress.
 
 The Rust crate is a starter binary. The first release targets local terminal use on Fedora KDE Wayland. Each milestone lists its tasks and exit criterion. Task files contain acceptance criteria and development notes.
 
-### 1. Establish feasibility and performance targets
+### 1. Establish feasibility
 
 - [x] [MYT-001 Measure Tabby baseline](tasks/MYT-001-measure-tabby-baseline.md)
 - [x] [MYT-002 Prototype shell state detection](tasks/MYT-002-prototype-shell-state-detection.md)
 - [x] [MYT-003 Evaluate toolkit and terminal engine](tasks/MYT-003-evaluate-toolkit-and-terminal-engine.md)
-- [ ] [MYT-005 Set performance targets and settings scope](tasks/MYT-005-set-performance-targets-and-settings-scope.md)
+- [ ] [MYT-005 Set performance targets and settings scope](tasks/MYT-005-set-performance-targets-and-settings-scope.md) · Deferred
 - [ ] [MYT-006 Prototype click to position](tasks/MYT-006-prototype-click-to-position.md)
 
-**Exit criterion.** The prototype demonstrates all three FR-5 cases on the reference machine. The plan records the stack choice, settings scope, and performance targets.
+**Exit criterion.** The prototype demonstrates all three FR-5 cases on the reference machine. The plan records the stack choice.
 
 ### 2. Build the core terminal
 
@@ -60,7 +60,7 @@ The Rust crate is a starter binary. The first release targets local terminal use
 - [ ] [MYT-016 Verify release usability](tasks/MYT-016-verify-release-usability.md)
 - [ ] [MYT-018 Package and verify first release](tasks/MYT-018-package-and-verify-first-release.md)
 
-**Exit criterion.** The first build installs and passes core acceptance checks and performance targets on Fedora KDE Wayland.
+**Exit criterion.** The first build installs and passes core acceptance checks and verifies responsiveness under NFR-1 on Fedora KDE Wayland.
 
 ### 4. Expand features and distribution
 
@@ -72,9 +72,11 @@ The Rust crate is a starter binary. The first release targets local terminal use
 - [ ] [MYT-023 Add desktop-specific frontends](tasks/MYT-023-add-desktop-specific-frontends.md)
 - [ ] [MYT-024 Package for Flatpak](tasks/MYT-024-package-for-flatpak.md)
 
-**Exit criterion.** Each selected feature passes its checks. If FR-4 is selected, live split sessions also meet the agreed performance targets.
+**Exit criterion.** Each selected feature passes its checks. If FR-4 is selected, verify live split session responsiveness under NFR-1.
 
 ## Decisions
+
+- Apply NFR-1 during implementation and verification. Use the MYT-001 baseline where measurement methods are comparable. Define the initial settings controls in MYT-013. Revisit MYT-005 if numeric release targets are needed.
 
 - Planned features can appear in their intended menus, toolbars, or settings pages as disabled controls. Label features under active development **WIP** (Work in Progress) and features awaiting implementation **TBA** (To Be Added). Enable each control when its acceptance criteria pass.
 
@@ -84,4 +86,4 @@ The Rust crate is a starter binary. The first release targets local terminal use
 
 - Ship one neutral frontend first and keep it usable on every supported desktop. Keep shared session and settings policy independent of GUI toolkit types so optional desktop-specific frontends can reuse it. Verify the terminal engine boundary in the initial implementation under MYT-007.
 
-- Prototype the neutral frontend with GTK4 + VTE. If VTE prevents the required terminal input behavior or reusable terminal state becomes a deciding factor, evaluate Iced with a headless Alacritty engine.
+- Prototype the neutral frontend with GTK4 + VTE. If VTE prevents the required terminal input behavior or reusable terminal state becomes a deciding factor, compare `alacritty_terminal` and `libghostty-vt` in the same custom frontend.

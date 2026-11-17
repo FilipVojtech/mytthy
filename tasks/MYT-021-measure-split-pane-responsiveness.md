@@ -6,4 +6,4 @@ Recheck responsiveness with multiple active panes.
 
 ## Acceptance criteria
 
-- Run the performance workload with multiple active panes and compare results with the agreed targets.
+- Run the performance workload with multiple active panes and record responsiveness under NFR-1 and compare with the single-pane workload.

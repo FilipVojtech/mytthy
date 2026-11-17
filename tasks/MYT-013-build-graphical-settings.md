@@ -6,4 +6,4 @@ Build the graphical settings page. Verify the agreed controls take effect and pe
 
 ## Acceptance criteria
 
-- Open the settings page through the GUI. Change each agreed setting and verify its effect and persistence across relaunch.
+- Open the settings page through the GUI. Define the first-release controls. Change each included setting and verify its effect and persistence across relaunch.
