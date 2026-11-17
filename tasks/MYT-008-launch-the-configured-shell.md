@@ -23,8 +23,8 @@ Launch the configured login shell for new sessions and verify FR-1 after changin
 - GUI-free tests passed. A resolver probe matched the current account shell
   returned by `getent` with both an absolute stale `SHELL` and an invalid
   relative `SHELL`.
-- The current GTK/VTE launch still uses the environment-only path. When
-  integrating per-session launch, call the new resolver off the GUI thread
-  because NSS can query directory services. Preserve launch cancellation and
-  verify a new tab picks up an account shell change with the app still open.
-  Recheck Zsh with Oh My Zsh on native Wayland.
+- MYT-029 calls the resolver off the GUI thread for each launch in the default
+  Iced frontend. Its isolated Wayland checks covered cancellation during the
+  account lookup and surfaced an invalid executable. Verify a new tab picks
+  up an account shell change with the app still open and verify the configured
+  Zsh with Oh My Zsh on native Wayland. MYT-012 provides the new-tab entry point.
