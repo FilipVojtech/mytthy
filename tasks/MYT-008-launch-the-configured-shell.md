@@ -13,6 +13,12 @@ Launch the configured login shell for new sessions and verify FR-1 after changin
 - FR-1 · Use the configured default shell for new sessions.
 - NFR-5 · Dependency independence.
 
+## Conclusion
+
+New tabs resolve the current account shell independently of the inherited
+SHELL value. A real account-default change and configured Zsh with Oh My
+Zsh passed on native KWin Wayland in a disposable account namespace.
+
 ## Dev notes
 
 - The shared resolver calls Linux NSS by real user ID on each invocation. It
@@ -33,5 +39,13 @@ Launch the configured login shell for new sessions and verify FR-1 after changin
   to Zsh while the app remained open, with a stale inherited SHELL. The new
   tab launched Zsh and loaded the configured Oh My Zsh. The existing Bash
   tab kept its process and state. An invalid account executable surfaced a
-  per-tab launch error. This check used a private lookup fixture. A real
-  account-default change through the system account tools remains unverified.
+  per-tab launch error. This initial check used a private lookup fixture.
+- The final merged build passed a real NSS check with a private user/mount
+  namespace and disposable passwd, shadow and group files. The real
+  `chsh` command set the private account shell to Bash, the app started, and
+  `chsh` then changed that account to Zsh while the app remained open.
+  `getent` confirmed the change. A new tab launched Zsh with the configured
+  Oh My Zsh while the original Bash tab retained its process and variables.
+  Shell exit and final window close reaped both sessions. The namespace
+  mapped the current host user to its private root account. Host account
+  defaults were untouched. No resolver preload was used for this check.
