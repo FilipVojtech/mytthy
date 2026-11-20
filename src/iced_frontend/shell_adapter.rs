@@ -152,10 +152,10 @@ impl Prepared {
                             }
                             while let Some(end) = received.iter().position(|byte| *byte == b'\n') {
                                 let record: Vec<_> = received.drain(..=end).collect();
-                                if process_record(shared, &record, notify) {
-                                    if let Some(path) = pending_file.take() {
-                                        let _ = fs::remove_file(path);
-                                    }
+                                if process_record(shared, &record, notify)
+                                    && let Some(path) = pending_file.take()
+                                {
+                                    let _ = fs::remove_file(path);
                                 }
                             }
                         }
@@ -170,7 +170,12 @@ impl Prepared {
                 match result {
                     Ok(path) => pending_file = Some(path),
                     Err(error) => {
-                        shared.state.lock().unwrap().inflight = None;
+                        {
+                            let mut state = shared.state.lock().unwrap();
+                            if state.inflight == Some(request.generation) {
+                                state.inflight = None;
+                            }
+                        }
                         notify(Event::Submitted {
                             generation: request.generation,
                             result: Err(error.to_string()),
