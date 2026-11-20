@@ -20,6 +20,14 @@ Implement FR-5 per session. Verify the acceptance matrix, including a foreground
 - FR-5 · Context-sensitive Ctrl+C
 - FR-6 · App-owned command input
 
+## Conclusion
+
+The integrated app passed the Ctrl+C acceptance matrix on native KWin
+Wayland. Idle selections copied from the active editor or terminal.
+An unselected idle draft cleared and forwarded Ctrl+C. Foreground and
+unknown states forwarded Ctrl+C while retaining the clipboard, and copy
+resumed at the next confirmed prompt.
+
 ## Dev notes
 
 Read the [shell-state prototype result](MYT-002-prototype-shell-state-detection.md) for hook loading and event-ordering checks.
@@ -41,9 +49,29 @@ Read the [shell-state prototype result](MYT-002-prototype-shell-state-detection.
 - Formatting and the GUI-free shared session tests passed. The policy test
   exercises all combinations of confirmed readiness and active selection.
   The existing marker parsing test still passes. No dependencies were added.
-- Native Wayland verification remains for the combined adapter/editor build.
-  Check idle selected editor text and terminal output, idle unselected draft
-  clearing, interruption of an external command and a Zsh builtin with a
-  selection, unknown-state forwarding, and copy resuming at a fresh idle
-  prompt. Observe the real clipboard and verify selections in separate tabs
-  remain scoped to their own session.
+### Native Wayland verification
+
+- On 2026-11-20, the reference machine ran KWin 6.8.3 with a private
+  1024 × 768 virtual output and disposable Zsh startup and history files.
+  Pointer drags and keyboard events went through KWin's fake-input
+  protocol. Clipboard assertions read the compositor's real standard
+  clipboard with an external `wl-paste` process.
+- A selected app-owned draft copied with Ctrl+C. An unselected draft
+  cleared, and a subsequent command executed normally. Selecting terminal
+  output at an idle prompt copied its exact text. Separate tabs retained
+  their own draft and selection state.
+- An external `cat` received an exact line through the PTY. With its
+  terminal output selected, Ctrl+C interrupted the program and preserved a
+  seeded clipboard value. A subsequent command confirmed prompt editing
+  resumed. The shell's `read` builtin passed the same interrupt check while
+  sharing the shell's process group. Afterward, idle Ctrl+C copied the
+  selected terminal output again.
+- An unsupported Bash session exercised unknown-state fallback. It received
+  normal PTY input, forwarded Ctrl+C with text selected, preserved the
+  clipboard, and accepted the next command. A process-local account lookup
+  fixture selected Bash for this check. Host account defaults were untouched.
+- The final foreground, builtin and unknown checks used the exact copied
+  integrated binary with SHA-256
+  `e7cfaec857a2ff94645c4d83fd36fbc0533b847997578d7444cbd439d61b6ff1`.
+  Earlier idle and tab checks passed the immediately preceding integrated
+  build. Test scripts and logs were kept under `/tmp/myt010-verify`.
