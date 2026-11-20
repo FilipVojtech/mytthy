@@ -588,13 +588,16 @@ impl App {
                                 .map_or(12.0, |size| f32::from(size.points()));
                             column![
                                 transcript,
-                                command_editor::view(
-                                    &tab.editor,
-                                    font_points * 96.0 / 72.0,
-                                    tab.terminal_selection,
-                                    || session.prompt().is_some()
-                                )
-                                .map(move |message| Message::Editor(tab.id, message))
+                                iced::widget::keyed_column([(
+                                    tab.id,
+                                    command_editor::view(
+                                        &tab.editor,
+                                        font_points * 96.0 / 72.0,
+                                        tab.terminal_selection,
+                                        || session.prompt().is_some()
+                                    )
+                                    .map(move |message| Message::Editor(tab.id, message))
+                                )])
                             ]
                             .into()
                         } else {
