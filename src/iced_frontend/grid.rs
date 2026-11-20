@@ -60,6 +60,9 @@ pub(super) struct Grid<'a, Message> {
     pub terminal: &'a Terminal,
     pub focused: bool,
     pub on_input: Box<dyn Fn(Vec<u8>) -> Message + 'a>,
+    pub on_select: Box<dyn Fn() -> Message + 'a>,
+    pub copy_enabled: bool,
+    pub paste_enabled: bool,
 }
 
 impl<Message> Widget<Message, Theme, Renderer> for Grid<'_, Message> {
@@ -102,6 +105,7 @@ impl<Message> Widget<Message, Theme, Renderer> for Grid<'_, Message> {
             Event::Mouse(mouse::Event::ButtonPressed(mouse::Button::Left))
                 if cursor.is_over(bounds) =>
             {
+                shell.publish((self.on_select)());
                 state.dragging = true;
                 state.pointer = cursor.position();
                 self.select_pointer(state, bounds, true);
@@ -133,12 +137,16 @@ impl<Message> Widget<Message, Theme, Renderer> for Grid<'_, Message> {
                 if self.focused && modifiers.control() && modifiers.shift() =>
             {
                 match key.as_ref() {
-                    Key::Character(character) if character.eq_ignore_ascii_case("c") => {
+                    Key::Character(character)
+                        if self.copy_enabled && character.eq_ignore_ascii_case("c") =>
+                    {
                         if let Some(text) = self.terminal.lock().selection_to_string() {
                             clipboard.write(iced::advanced::clipboard::Kind::Standard, text);
                         }
                     }
-                    Key::Character(character) if character.eq_ignore_ascii_case("v") => {
+                    Key::Character(character)
+                        if self.paste_enabled && character.eq_ignore_ascii_case("v") =>
+                    {
                         if let Some(text) =
                             clipboard.read(iced::advanced::clipboard::Kind::Standard)
                         {

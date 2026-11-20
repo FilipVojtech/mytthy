@@ -1,3 +1,4 @@
+mod command_editor;
 mod grid;
 mod input;
 mod process;
@@ -15,6 +16,7 @@ use iced::{
     widget::{button, center, column, row, scrollable, sensor, text},
     window,
 };
+use mytthy::session::{CtrlCAction, ctrl_c_action};
 use mytthy::settings::Settings;
 
 pub(super) fn run() -> iced::Result {
@@ -63,6 +65,8 @@ enum Message {
     Activate(SessionId),
     CloseTab(SessionId),
     Input(SessionId, Vec<u8>),
+    Editor(SessionId, command_editor::Message),
+    TerminalSelected(SessionId),
 }
 
 struct Tab {
@@ -71,6 +75,8 @@ struct Tab {
     closing: bool,
     scroll_remainder: f32,
     error: Option<String>,
+    editor: command_editor::Editor,
+    terminal_selection: bool,
 }
 
 struct App {
@@ -138,6 +144,8 @@ impl App {
             closing: false,
             scroll_remainder: 0.0,
             error: None,
+            editor: command_editor::Editor::default(),
+            terminal_selection: false,
         });
         self.active = Some(id);
         // Worker messages always retain their session identity through tab switches/removal.
@@ -183,7 +191,7 @@ impl App {
             let mut terminal = session.terminal.lock();
             terminal.scroll_display(Scroll::Bottom);
             drop(terminal);
-            session.send(Msg::Input(bytes.into()));
+            session.forward_input(bytes);
         }
     }
 
@@ -256,8 +264,21 @@ impl App {
             }
             Message::CloseTab(id) => return self.close_tab(id),
             Message::Input(id, bytes) => self.send_input(id, bytes),
+            Message::TerminalSelected(id) => {
+                if let Some(tab) = self.tabs.iter_mut().find(|tab| tab.id == id) {
+                    tab.terminal_selection = true;
+                }
+            }
+            Message::Editor(id, message) => return self.update_editor(id, message),
             Message::Key(event) if !self.settings_open => {
                 if let keyboard::Event::KeyPressed { key, modifiers, .. } = &event {
+                    if modifiers.control()
+                        && !modifiers.shift()
+                        && matches!(key.as_ref(), keyboard::Key::Character(c) if c.eq_ignore_ascii_case("c"))
+                        && let Some(id) = self.active
+                    {
+                        return self.interrupt(id);
+                    }
                     if modifiers.control() && modifiers.shift() {
                         if key.as_ref() == keyboard::Key::Character("T")
                             || key.as_ref() == keyboard::Key::Character("t")
@@ -293,6 +314,9 @@ impl App {
                     .find(|tab| Some(tab.id) == self.active && !tab.closing)
                     && let Some(session) = &tab.session
                 {
+                    if session.prompt().is_some() && !tab.editor.draft.pending() {
+                        return Task::none();
+                    }
                     let bytes = input::encode(&event, *session.terminal.lock().mode());
                     if let Some(bytes) = bytes {
                         self.send_input(tab.id, bytes);
@@ -324,6 +348,73 @@ impl App {
             Message::Key(_) | Message::Scroll(_) => {}
             Message::Session(id, update) => return self.session_update(id, update),
         }
+        Task::none()
+    }
+
+    fn update_editor(&mut self, id: SessionId, message: command_editor::Message) -> Task<Message> {
+        if self.settings_open {
+            return Task::none();
+        }
+        if matches!(message, command_editor::Message::Interrupt) {
+            return self.interrupt(id);
+        }
+        let Some(tab) = self
+            .tabs
+            .iter_mut()
+            .find(|tab| tab.id == id && !tab.closing)
+        else {
+            return Task::none();
+        };
+        let Some(session) = &tab.session else {
+            return Task::none();
+        };
+        let Some(generation) = session.prompt() else {
+            return Task::none();
+        };
+        match message {
+            command_editor::Message::Action(action) => {
+                tab.terminal_selection = false;
+                tab.editor.perform(action);
+                return iced::widget::operation::focus("command-editor");
+            }
+            command_editor::Message::Submit => {
+                if let Some(draft) = tab.editor.draft.begin_submission(generation) {
+                    if let Err(error) = session.submit(generation, draft) {
+                        tab.editor.acknowledge(generation, Err(error));
+                    }
+                } else if !tab.editor.draft.pending() {
+                    tab.editor.error = Some("Command contains a NUL character".into());
+                }
+            }
+            command_editor::Message::Interrupt => unreachable!(),
+        }
+        Task::none()
+    }
+
+    fn interrupt(&mut self, id: SessionId) -> Task<Message> {
+        let Some(tab) = self
+            .tabs
+            .iter_mut()
+            .find(|tab| tab.id == id && !tab.closing)
+        else {
+            return Task::none();
+        };
+        let Some(session) = &tab.session else {
+            return Task::none();
+        };
+        let ready = session.prompt().is_some() && !tab.editor.draft.pending();
+        let selection = if tab.terminal_selection {
+            session.terminal.lock().selection_to_string()
+        } else {
+            tab.editor.content.selection()
+        }
+        .filter(|text| !text.is_empty());
+        match ctrl_c_action(ready, selection.is_some()) {
+            CtrlCAction::CopySelection => return iced::clipboard::write(selection.unwrap()),
+            CtrlCAction::ClearDraftAndForward => tab.editor.clear(),
+            CtrlCAction::Forward => {}
+        }
+        session.forward_input(vec![3]);
         Task::none()
     }
 
@@ -402,6 +493,12 @@ impl App {
             }
             Update::Started => {}
             Update::Wakeup => session.wakeup_received(),
+            Update::PromptChanged => {
+                if self.active == Some(id) && !self.settings_open && session.prompt().is_some() {
+                    return iced::widget::operation::focus("command-editor");
+                }
+            }
+            Update::Submitted { generation, result } => tab.editor.acknowledge(generation, result),
             Update::Terminal(event) => {
                 let response = match event {
                     TerminalEvent::PtyWrite(text) => text,
@@ -467,27 +564,53 @@ impl App {
             match self.tabs.iter().find(|tab| Some(tab.id) == self.active) {
                 Some(tab) if tab.closing => center(text("Closing terminal…")).into(),
                 Some(tab) => match &tab.session {
-                    Some(session) => Element::new(Grid {
-                        metrics: self.metrics,
-                        terminal: &session.terminal,
-                        focused: self.focused,
-                        on_input: Box::new(move |bytes| Message::Input(tab.id, bytes)),
-                    }),
+                    Some(session) => {
+                        let terminal = Element::new(Grid {
+                            metrics: self.metrics,
+                            terminal: &session.terminal,
+                            focused: self.focused,
+                            on_input: Box::new(move |bytes| Message::Input(tab.id, bytes)),
+                            on_select: Box::new(move || Message::TerminalSelected(tab.id)),
+                            copy_enabled: tab.terminal_selection || session.prompt().is_none(),
+                            paste_enabled: session.prompt().is_none(),
+                        });
+                        let transcript = sensor(terminal)
+                            .on_show(Message::GridResized)
+                            .on_resize(Message::GridResized);
+                        if session.prompt().is_some()
+                            || tab.editor.draft.pending()
+                            || !tab.editor.draft.text().is_empty()
+                            || tab.editor.error.is_some()
+                        {
+                            let font_points = self
+                                .settings
+                                .terminal_font_size
+                                .map_or(12.0, |size| f32::from(size.points()));
+                            column![
+                                transcript,
+                                command_editor::view(
+                                    &tab.editor,
+                                    font_points * 96.0 / 72.0,
+                                    tab.terminal_selection,
+                                    || session.prompt().is_some()
+                                )
+                                .map(move |message| Message::Editor(tab.id, message))
+                            ]
+                            .into()
+                        } else {
+                            transcript.into()
+                        }
+                    }
                     None => center(text(tab.error.as_deref().unwrap_or("Starting shell…")))
                         .padding(16)
                         .into(),
                 },
                 None => center(text("Starting shell…")).into(),
             };
-        column![
-            toolbar,
-            sensor(content)
-                .on_show(Message::GridResized)
-                .on_resize(Message::GridResized)
-        ]
-        .width(Length::Fill)
-        .height(Length::Fill)
-        .into()
+        column![toolbar, content]
+            .width(Length::Fill)
+            .height(Length::Fill)
+            .into()
     }
 }
 
