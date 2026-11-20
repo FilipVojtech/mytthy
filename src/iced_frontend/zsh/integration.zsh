@@ -22,6 +22,13 @@ _mytthy_prompt() {
   fi
   return 0
 }
+_mytthy_reject() {
+  emulate -L zsh
+  print -r -u $_mytthy_fd -- "R ${1:-0}" 2>/dev/null || :
+  if [[ $_mytthy_idle == 1 && $CONTEXT == start && -z $BUFFER ]]; then
+    print -r -u $_mytthy_fd -- "P $_mytthy_generation" 2>/dev/null || :
+  fi
+}
 _mytthy_accept() {
   emulate -L zsh
   local kind generation draft_path draft
@@ -32,13 +39,12 @@ _mytthy_accept() {
   draft_path=$_mytthy_shim/draft-$generation
   if [[ $kind != S || $generation != <-> || $generation != $_mytthy_generation ||
         $_mytthy_idle != 1 || $CONTEXT != start || -n $BUFFER || ! -f $draft_path ]]; then
-    print -r -u $_mytthy_fd -- "R ${generation:-0}" 2>/dev/null || :
+    _mytthy_reject "$generation"
     return 0
   fi
   # NUL delimiters preserve embedded and trailing newlines in the UTF-8 draft.
   if ! IFS= read -r -d '' draft < "$draft_path"; then
-    print -r -u $_mytthy_fd -- "R $generation" 2>/dev/null || :
-    print -r -u $_mytthy_fd -- "P $_mytthy_generation" 2>/dev/null || :
+    _mytthy_reject "$generation"
     return 0
   fi
   BUFFER=$draft
