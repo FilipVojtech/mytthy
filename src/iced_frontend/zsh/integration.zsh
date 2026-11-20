@@ -24,19 +24,23 @@ _mytthy_prompt() {
 }
 _mytthy_accept() {
   emulate -L zsh
-  local kind generation path draft
+  local kind generation draft_path draft
   # A private wake key without an accompanying request must leave ZLE alone.
   if ! IFS=' ' read -r -t 0.1 -u $_mytthy_fd kind generation; then
     return 0
   fi
-  path=$_mytthy_shim/draft-$generation
+  draft_path=$_mytthy_shim/draft-$generation
   if [[ $kind != S || $generation != <-> || $generation != $_mytthy_generation ||
-        $_mytthy_idle != 1 || $CONTEXT != start || -n $BUFFER || ! -f $path ]]; then
+        $_mytthy_idle != 1 || $CONTEXT != start || -n $BUFFER || ! -f $draft_path ]]; then
     print -r -u $_mytthy_fd -- "R ${generation:-0}" 2>/dev/null || :
     return 0
   fi
   # NUL delimiters preserve embedded and trailing newlines in the UTF-8 draft.
-  IFS= read -r -d '' draft < "$path"
+  if ! IFS= read -r -d '' draft < "$draft_path"; then
+    print -r -u $_mytthy_fd -- "R $generation" 2>/dev/null || :
+    print -r -u $_mytthy_fd -- "P $_mytthy_generation" 2>/dev/null || :
+    return 0
+  fi
   BUFFER=$draft
   CURSOR=${#BUFFER}
   _mytthy_idle=0
