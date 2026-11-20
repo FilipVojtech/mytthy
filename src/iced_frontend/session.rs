@@ -1,3 +1,6 @@
+#[path = "shell_adapter.rs"]
+mod shell_adapter;
+
 use super::process::ChildProcess;
 use alacritty_terminal::{
     Term,
@@ -54,6 +57,11 @@ impl Dimensions for GridSize {
 #[derive(Clone)]
 pub(super) enum Update {
     Started,
+    PromptChanged,
+    Submitted {
+        generation: u64,
+        result: Result<(), String>,
+    },
     Wakeup,
     Terminal(Event),
     Stopped(Result<(), String>),
@@ -149,11 +157,39 @@ impl Session {
 
     pub fn close(&self) {
         self.control.closing.store(true, Ordering::SeqCst);
+        if let Some(adapter) = self.control.adapter.get() {
+            adapter.stop();
+        }
         if !self.control.stopped.load(Ordering::Acquire)
             && let Some(pty) = self.control.pty.get()
         {
             pty.stop();
         }
+    }
+
+    pub fn prompt(&self) -> Option<u64> {
+        if self.control.closing.load(Ordering::Acquire) {
+            return None;
+        }
+        self.control.adapter.get()?.prompt()
+    }
+
+    pub fn submit(&self, generation: u64, draft: String) -> Result<(), String> {
+        if self.control.closing.load(Ordering::Acquire) {
+            return Err("The terminal session is closing".into());
+        }
+        self.control
+            .adapter
+            .get()
+            .ok_or_else(|| "This shell has no app-owned input adapter".to_string())?
+            .submit(generation, draft)
+    }
+
+    pub fn forward_input(&self, bytes: Vec<u8>) {
+        if let Some(adapter) = self.control.adapter.get() {
+            adapter.invalidate();
+        }
+        self.send(Msg::Input(bytes.into()));
     }
 
     pub fn send(&self, message: Msg) {
@@ -175,6 +211,7 @@ struct Control {
     closing: AtomicBool,
     stopped: AtomicBool,
     pty: OnceLock<PtyControl>,
+    adapter: OnceLock<shell_adapter::Handle>,
 }
 
 struct PtyControl {
@@ -208,7 +245,18 @@ fn run(terminal: Terminal, listener: Listener, size: GridSize) -> io::Result<()>
             ),
         )
     })?;
-    let options = Options {
+    let prepared = if shell.file_name().is_some_and(|name| name == "zsh") {
+        match shell_adapter::Prepared::new() {
+            Ok(adapter) => Some(adapter),
+            Err(error) => {
+                eprintln!("Could not prepare Zsh input adapter: {error}");
+                None
+            }
+        }
+    } else {
+        None
+    };
+    let mut options = Options {
         shell: Some(Shell::new(program.to_owned(), Vec::new())),
         env: [
             ("TERM".into(), "xterm-256color".into()),
@@ -218,6 +266,9 @@ fn run(terminal: Terminal, listener: Listener, size: GridSize) -> io::Result<()>
         .into(),
         ..Options::default()
     };
+    if let Some(adapter) = &prepared {
+        options.env.extend(adapter.environment());
+    }
     let pty = tty::new(&options, size.window_size(), 0).map_err(|error| {
         io::Error::new(error.kind(), format!("Could not launch {program}: {error}"))
     })?;
@@ -227,6 +278,11 @@ fn run(terminal: Terminal, listener: Listener, size: GridSize) -> io::Result<()>
             error
         })
         .ok();
+    let master = prepared
+        .as_ref()
+        .map(|_| pty.file().try_clone())
+        .transpose()?;
+    let pid = pty.child().id();
     let event_loop =
         EventLoop::new(terminal, listener.clone(), pty, true, false).map_err(|error| {
             io::Error::new(error.kind(), format!("Could not start PTY I/O: {error}"))
@@ -236,6 +292,23 @@ fn run(terminal: Terminal, listener: Listener, size: GridSize) -> io::Result<()>
         child,
         stopping: AtomicBool::new(false),
     });
+    if let (Some(prepared), Some(master)) = (prepared, master) {
+        let updates = listener.updates.clone();
+        match prepared.start(master, pid, control.sender.clone(), move |event| {
+            let update = match event {
+                shell_adapter::Event::Changed => Update::PromptChanged,
+                shell_adapter::Event::Submitted { generation, result } => {
+                    Update::Submitted { generation, result }
+                }
+            };
+            let _ = updates.unbounded_send(update);
+        }) {
+            Ok(adapter) => {
+                let _ = listener.control.adapter.set(adapter);
+            }
+            Err(error) => eprintln!("Could not start Zsh input adapter: {error}"),
+        }
+    }
     // The close request and publication can arrive in either order. A close
     // that could not see the published control is handled by the worker here.
     if listener.control.closing.load(Ordering::SeqCst)
@@ -251,6 +324,9 @@ fn run(terminal: Terminal, listener: Listener, size: GridSize) -> io::Result<()>
             .join()
             .map_err(|_| io::Error::other("PTY worker panicked"))?,
     );
+    if let Some(adapter) = listener.control.adapter.get() {
+        adapter.stop();
+    }
     if !listener.child_exited.load(Ordering::Relaxed)
         && !listener.control.closing.load(Ordering::SeqCst)
     {
