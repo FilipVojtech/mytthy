@@ -37,6 +37,10 @@
 - `src/iced_frontend/mod.rs` owns tab identity, worker routing, and settings
   application. `grid.rs` owns grid rendering, selection, and clipboard
   gestures. `settings_view.rs` supplies settings controls and draft validation.
+- `src/command_input.rs` owns the shared draft and submission transaction.
+  `src/iced_frontend/command_editor.rs` supplies the native editor.
+  `shell_adapter.rs` and `zsh/` implement Zsh readiness and acknowledged
+  submission over a private per-session control channel.
 - `src/bin/mytthy-gtk.rs` is the optional GTK4/VTE reference from MYT-007.
 - `src/lib.rs` exposes shared policy such as `src/session.rs` and
   `src/settings.rs`. Keep those modules independent of frontend and

@@ -18,6 +18,13 @@ Completion is tracked in [MYT-030](MYT-030-implement-command-completion.md).
 - FR-5 · Context-sensitive Ctrl+C
 - FR-6 · App-owned command input
 
+## Conclusion
+
+The app-owned Zsh editor passed native Wayland caret, selection, multiline
+submission, normal history, per-tab draft, font-size, and configured Oh My
+Zsh checks. MYT-010 verified foreground and unknown-state PTY handoff and
+the Ctrl+C matrix. Completion remains in MYT-030.
+
 ## Dev notes
 
 - History search scope remains an open product decision.
@@ -71,4 +78,4 @@ Completion is tracked in [MYT-030](MYT-030-implement-command-completion.md).
   with a disposable HISTFILE. App-owned prompt readiness, multiline execution,
   and normal full-buffer history all passed with that configuration.
 - The combined foreground/unknown-state and Ctrl+C acceptance matrix is
-  recorded in MYT-010 before closing the two tasks.
+  recorded in the completed MYT-010 acceptance results.

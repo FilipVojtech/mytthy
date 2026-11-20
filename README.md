@@ -30,6 +30,13 @@ Drag to select output, copy with Ctrl+Shift+C, and paste with Ctrl+Shift+V.
 Open Settings to change the terminal font size for all tabs and save it
 across relaunches.
 
+At a supported Zsh prompt, edit commands in the panel below the transcript.
+Enter submits the full draft and Shift+Enter inserts a newline. Foreground
+programs and unsupported shells receive normal terminal input. At an idle
+prompt, Ctrl+C copies the active selection, or clears an unselected draft
+and forwards Ctrl+C. During foreground execution it forwards Ctrl+C even
+with text selected. Completion is tracked in MYT-030.
+
 ### GTK4/VTE reference
 
 The original PTY window is available as `mytthy-gtk`. It uses GTK 4.18 or
