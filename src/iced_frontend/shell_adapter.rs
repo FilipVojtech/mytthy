@@ -202,27 +202,44 @@ impl Prepared {
         let socket =
             socket.ok_or_else(|| io::Error::other("Shell input channel is unavailable"))?;
         let path = self.root.join(format!("draft-{}", request.generation));
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .mode(0o600)
-            .open(&path)?;
-        file.write_all(request.draft.as_bytes())?;
-        file.write_all(&[0])?;
-        let record = format!("S {}\n", request.generation);
-        // The control record is bounded and one write must queue it in full.
-        // If it cannot, close the channel so a partial record can never become a command.
-        match socket.write(record.as_bytes()) {
-            Ok(length) if length == record.len() => {}
-            _ => {
-                let _ = socket.shutdown(std::net::Shutdown::Both);
-                return Err(io::Error::other("Could not queue shell submission"));
+        let result = (|| {
+            let mut file = OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .mode(0o600)
+                .open(&path)?;
+            file.write_all(request.draft.as_bytes())?;
+            file.write_all(&[0])?;
+            let record = format!("S {}\n", request.generation);
+            // Serialize the final dispatch with user input invalidation. Both
+            // socket writes and the event-loop send are nonblocking here.
+            let state = shared.state.lock().unwrap();
+            if state.inflight != Some(request.generation)
+                || state.cancelled
+                || shared.stopped.load(Ordering::Acquire)
+                || !shared.foreground()
+            {
+                return Err(io::Error::other(
+                    "Command submission was cancelled before dispatch",
+                ));
             }
+            // A partial control record closes the channel before any wake key.
+            match socket.write(record.as_bytes()) {
+                Ok(length) if length == record.len() => {}
+                _ => {
+                    let _ = socket.shutdown(std::net::Shutdown::Both);
+                    return Err(io::Error::other("Could not queue shell submission"));
+                }
+            }
+            sender
+                .send(Msg::Input(self.wake.as_bytes().to_vec().into()))
+                .map_err(|_| io::Error::other("PTY closed while submitting the command"))?;
+            Ok(())
+        })();
+        if result.is_err() {
+            let _ = fs::remove_file(&path);
         }
-        sender
-            .send(Msg::Input(self.wake.as_bytes().to_vec().into()))
-            .map_err(|_| io::Error::other("PTY closed while submitting the command"))?;
-        Ok(path)
+        result.map(|()| path)
     }
 }
 
@@ -236,6 +253,7 @@ impl Drop for Prepared {
 struct State {
     prompt: Option<u64>,
     inflight: Option<u64>,
+    cancelled: bool,
 }
 struct Shared {
     master: File,
@@ -274,7 +292,9 @@ impl Handle {
         self.shared.prompt()
     }
     pub fn invalidate(&self) {
-        self.shared.state.lock().unwrap().prompt = None;
+        let mut state = self.shared.state.lock().unwrap();
+        state.prompt = None;
+        state.cancelled = state.inflight.is_some();
     }
     pub fn stop(&self) {
         self.shared.stopped.store(true, Ordering::Release);
@@ -291,6 +311,7 @@ impl Handle {
             return Err("The shell prompt changed before submission".into());
         }
         state.inflight = Some(generation);
+        state.cancelled = false;
         state.prompt = None;
         if self.requests.send(Request { generation, draft }).is_err() {
             state.inflight = None;
